@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BarDG.Dominio
+﻿namespace BarDG.Dominio
 {
-   public class Item
+    public class Item
     {
         public int Id { get; private set; }
         public string Nome { get; private set; }

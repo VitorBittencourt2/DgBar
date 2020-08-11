@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using Xceed.Wpf.Toolkit;
 
 namespace BarDG.Dominio
 {
@@ -9,7 +7,7 @@ namespace BarDG.Dominio
         static void Main(string[] args)
         {
             var itemSuco1 = new Item(1, "Suco", 50, 1);
-            var itemSuco2 = new Item(2, "Suco", 50, 3);
+            var itemSuco2 = new Item(1, "Suco", 50, 3);
          
             var itemAgua1 = new Item(3, "Agua", 70, 1);
             var itemCerveja = new Item(4, "Cerveja", 5, 5); //bug na quantidade
