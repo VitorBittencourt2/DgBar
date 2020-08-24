@@ -15,42 +15,38 @@ namespace BarDG.Dominio
 
         public void RegistrarItem(Item item)
         {
+            var itensSuco = Itens.FirstOrDefault(x => x.Id == 1);
             // barrar inserir suco com mais de 3 de quantidade
             if (item.Id == 1 && item.Quantidade > 3)
                 return;
 
             // barrar se eu já tenho suco na minha lista e a quantidade informada + quantidade excede o limite
-            var itensSuco = Itens.FirstOrDefault(x => x.Id == 1);
+
 
             if (itensSuco != null)
             {
                 var qtde = itensSuco.Quantidade + item.Quantidade;
 
-                if (qtde > 3)
+                if (itensSuco.Quantidade > 3)
                 {
-                    Console.WriteLine("Quantidade de suco informada excete o limite de 3");
+                    Console.WriteLine("Quantidade de suco informada excede o limite de 3");
                     return;
                 }
                 else
                 {
-                    // estou atualizando a quantidade de sucos na minha lista
+                    //  Atualização de Suco na lista
                     itensSuco.Quantidade = qtde;
+                    Itens.Add(item);
+                    Console.WriteLine($"Item {item.Nome} adicionado");
+
                 }
+
             }
             else
             {
-                // Corrigir a validação da quantidade para que considere apenas
-                // item suco
-                //if (item.Quantidade <= 4)
-                //{
                 Itens.Add(item);
                 Console.WriteLine($"Item {item.Nome} adicionado");
-                //}
 
-                //else
-                //{
-                //    return;
-                //}
             }
 
         }
@@ -60,6 +56,9 @@ namespace BarDG.Dominio
             double valorFinal = 0;
             double desconto = 0;
             double preco = 0;
+            double descontoCerveja = 0;
+            double descontoAgua = 0;
+
 
             var itemCerveja = Itens.FirstOrDefault(x => x.Nome == "Cerveja");
             var itemConhaque = Itens.FirstOrDefault(x => x.Nome == "Conhaque");
@@ -68,44 +67,32 @@ namespace BarDG.Dominio
 
             if (itemCerveja != null)
             {
-                preco = itemCerveja.Quantidade * itemCerveja.Valor;
-            }
-            else if (itemCerveja != null)
-            {                
-                preco += itemConhaque.Quantidade * itemConhaque.Valor;
-            }
-            else if (itemSuco != null)
-            {
-                preco += itemSuco.Quantidade * itemSuco.Valor;
-            }
-            // calcular o valor total de água
-            else if (itemAgua)
-            {
-                preco += 70;
-                preco = preco * item.Quantidade;
-                // e se eu tiver 4 cervejas e 6 conhaques ?
-                if (itemCerveja && item.Quantidade == 2 ||
-                    itemConhaque && item.Quantidade == 3)
+
+                if (itemCerveja.Quantidade == 5)
                 {
-                    preco += 0;
-
-                    desconto = 70;
+                    descontoCerveja = 5;
                 }
+
             }
 
-            // daqui pra frente, calcular os descontos:
-
-            if (item.Quantidade == 5 && item.Nome == "Cerveja")
+            else if (itemAgua != null)
             {
-                desconto = 5;
+                //  preco += itemAgua.Quantidade * itemAgua.Valor;
+                if (itemCerveja.Quantidade == 2 && itemConhaque.Quantidade == 3)
+                {
+                    descontoAgua = 70;
+                }
             }
 
             foreach (Item it in Itens)
             {
                 Console.WriteLine("item: " + it.Nome + "\nQuantidade:" + it.Quantidade);
-                valorFinal = preco - desconto;
-            }
 
+                preco = it.Valor * it.Quantidade;
+                desconto = descontoCerveja + descontoAgua;
+                valorFinal += preco - desconto;
+
+            }
             Console.WriteLine("Desconto: " + desconto + "\nValorfinal: " + valorFinal);
 
         }
