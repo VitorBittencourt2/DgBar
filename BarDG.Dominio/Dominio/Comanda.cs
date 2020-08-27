@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BarDG.Dominio.Contratos;
 
 namespace BarDG.Dominio
 {
@@ -8,47 +9,25 @@ namespace BarDG.Dominio
     {
         public List<Item> Itens { get; private set; }
 
-        public Comanda()
+        public IEnumerable<IRestritor> Restritores { get; private set; }
+        
+        public Comanda(IEnumerable<IRestritor> restritores)
         {
+            Restritores = restritores;            
             Itens = new List<Item>();
         }
 
         public void RegistrarItem(Item item)
         {
-            var itensSuco = Itens.FirstOrDefault(x => x.Id == 1);
-            // barrar inserir suco com mais de 3 de quantidade
-            if (item.Id == 1 && item.Quantidade > 3)
-                return;
-
-            // barrar se eu já tenho suco na minha lista e a quantidade informada + quantidade excede o limite
-
-
-            if (itensSuco != null)
+            foreach(var restritor in Restritores)
             {
-                var qtde = itensSuco.Quantidade + item.Quantidade;
+                var ehValido = restritor.EhValido(this, item);
 
-                if (itensSuco.Quantidade > 3)
-                {
-                    Console.WriteLine("Quantidade de suco informada excede o limite de 3");
-                    return;
-                }
+                if(!ehValido)
+                    return ;
                 else
-                {
-                    //  Atualização de Suco na lista
-                    itensSuco.Quantidade = qtde;
-                    Itens.Add(item);
-                    Console.WriteLine($"Item {item.Nome} adicionado");
-
-                }
-
+                    Itens.Add(item);                
             }
-            else
-            {
-                Itens.Add(item);
-                Console.WriteLine($"Item {item.Nome} adicionado");
-
-            }
-
         }
 
         public void FechamentoComanda() //Item item
@@ -65,19 +44,19 @@ namespace BarDG.Dominio
             var itemAgua = Itens.FirstOrDefault(x => x.Nome == "Agua");
             var itemSuco = Itens.FirstOrDefault(x => x.Nome == "Suco");
 
+            
             if (itemCerveja != null)
             {
-
-                if (itemCerveja.Quantidade == 5)
+                // E se o cliente comprar 10 cervejas? Nesta lógica, ele teria apenas um desconto de cerveja e deveria ter 2;
+                if (itemCerveja.Quantidade == 7)
                 {
                     descontoCerveja = 5;
                 }
-
             }
 
             else if (itemAgua != null)
             {
-                //  preco += itemAgua.Quantidade * itemAgua.Valor;
+                // E se o cliente pedir 4 cervejas e 6 conhaques ?
                 if (itemCerveja.Quantidade == 2 && itemConhaque.Quantidade == 3)
                 {
                     descontoAgua = 70;
@@ -89,12 +68,11 @@ namespace BarDG.Dominio
                 Console.WriteLine("item: " + it.Nome + "\nQuantidade:" + it.Quantidade);
 
                 preco = it.Valor * it.Quantidade;
+                // E se amanhã eu quiser incluir um produto novo e incluir ele nesta conta ?
                 desconto = descontoCerveja + descontoAgua;
                 valorFinal += preco - desconto;
-
             }
             Console.WriteLine("Desconto: " + desconto + "\nValorfinal: " + valorFinal);
-
         }
 
         public void ResetaComanda()
@@ -102,8 +80,9 @@ namespace BarDG.Dominio
             Itens.Clear();
         }
     }
-
 }
+
+
 
 
 
