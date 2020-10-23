@@ -1,102 +1,64 @@
-﻿using System;
+﻿using BarDG.Dominio.Dominio;
+using BarDG.Dominio.Dominio.Contratos;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BarDG.Dominio
 {
     public class Comanda
     {
         public List<Item> Itens { get; private set; }
+        public bool ComandaFechada { get; set; }
+        public double ValorComDesconto { get; set; }
+        public double ValorSemDescontos { get; set; }
+        public IEnumerable<IRestritor> Restritores { get; private set; }
+        private readonly IDefinidorDePromocoes _executor;
+        private IEnumerable<Promocao> Promocoes { get; set; }
 
-        public Comanda()
+        public Comanda(IEnumerable<IRestritor> restritores, IDefinidorDePromocoes executor, IEnumerable<Promocao> promocoes)
         {
+            Restritores = restritores;
+            _executor = executor;
+            Promocoes = promocoes;
             Itens = new List<Item>();
         }
 
         public void RegistrarItem(Item item)
         {
-            var itensSuco = Itens.FirstOrDefault(x => x.Id == 1);
-            // barrar inserir suco com mais de 3 de quantidade
-            if (item.Id == 1 && item.Quantidade > 3)
-                return;
+            Console.WriteLine($"Ao adicionar item {item.Id}");
 
-            // barrar se eu já tenho suco na minha lista e a quantidade informada + quantidade excede o limite
-
-
-            if (itensSuco != null)
+            foreach (var restritor in Restritores)
             {
-                var qtde = itensSuco.Quantidade + item.Quantidade;
-
-                if (itensSuco.Quantidade > 3)
-                {
-                    Console.WriteLine("Quantidade de suco informada excede o limite de 3");
+                if (!restritor.EhValido(this, item))
                     return;
-                }
-                else
-                {
-                    //  Atualização de Suco na lista
-                    itensSuco.Quantidade = qtde;
-                    Itens.Add(item);
-                    Console.WriteLine($"Item {item.Nome} adicionado");
-
-                }
-
+            Itens.Add(item);
+            ValorSemDescontos = CalcularValorSemDescontos();
             }
-            else
-            {
-                Itens.Add(item);
-                Console.WriteLine($"Item {item.Nome} adicionado");
-
-            }
-
+           
         }
 
-        public void FechamentoComanda() //Item item
+       public double CalcularValorSemDescontos()
         {
-            double valorFinal = 0;
-            double desconto = 0;
-            double preco = 0;
-            double descontoCerveja = 0;
-            double descontoAgua = 0;
-
-
-            var itemCerveja = Itens.FirstOrDefault(x => x.Nome == "Cerveja");
-            var itemConhaque = Itens.FirstOrDefault(x => x.Nome == "Conhaque");
-            var itemAgua = Itens.FirstOrDefault(x => x.Nome == "Agua");
-            var itemSuco = Itens.FirstOrDefault(x => x.Nome == "Suco");
-
-            if (itemCerveja != null)
+            double valor = 0;
+            foreach (var item in Itens)
             {
-
-                if (itemCerveja.Quantidade == 5)
-                {
-                    descontoCerveja = 5;
-                }
-
+                valor += item.Valor * item.Quantidade;
             }
-
-            else if (itemAgua != null)
-            {
-                //  preco += itemAgua.Quantidade * itemAgua.Valor;
-                if (itemCerveja.Quantidade == 2 && itemConhaque.Quantidade == 3)
-                {
-                    descontoAgua = 70;
-                }
-            }
-
-            foreach (Item it in Itens)
-            {
-                Console.WriteLine("item: " + it.Nome + "\nQuantidade:" + it.Quantidade);
-
-                preco = it.Valor * it.Quantidade;
-                desconto = descontoCerveja + descontoAgua;
-                valorFinal += preco - desconto;
-
-            }
-            Console.WriteLine("Desconto: " + desconto + "\nValorfinal: " + valorFinal);
-
+            return valor;
         }
 
+        public void FechamentoComanda()
+        {
+            if (ComandaFechada) {
+                return;
+            }
+
+            ComandaFechada = true;
+
+            _executor.AplicarPromocoes(Promocoes, this);
+            ValorComDesconto = _executor.ObterValorTotal();
+
+        }
         public void ResetaComanda()
         {
             Itens.Clear();

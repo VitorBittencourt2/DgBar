@@ -1,5 +1,9 @@
-﻿using System;
-
+﻿using BarDG.Dominio.Dominio.Restritores;
+using System;
+using System.Collections.Generic;
+using BarDG.Dominio.Dominio.Contratos;
+using BarDG.Dominio.Dominio;
+using BarDG.Dominio.Dominio.Enum;
 
 namespace BarDG.Dominio
 {
@@ -7,37 +11,82 @@ namespace BarDG.Dominio
     {
         static void Main(string[] args)
         {
-            var itemSuco1 = new Item(1, "Suco", 50, 1);
-            var itemSuco3 = new Item(1, "Suco", 50, 1);
-            var itemSuco2 = new Item(1, "Suco", 50, 1);
-            var itemSuco4 = new Item(1, "Suco", 50, 1);
+            System.Console.WriteLine("Bar DG \n ");
 
-            var itemAgua1 = new Item(3, "Agua", 70, 1);
-            var itemCerveja = new Item(4, "Cerveja", 5, 5);
-            var itemConhaque = new Item(2, "Conhaque", 20, 3);
+            var itensRestritos = new Dictionary<int, int>
+            {
+                {3, 3},
+            };
 
-            var comanda = new Comanda();
+            var restricoes = new List<IRestritor> { 
+                new RestritorDeQuantidade(itensRestritos) 
+            };
 
-         //   comanda.RegistrarItem(itemAgua1);
-            comanda.RegistrarItem(itemCerveja);
-            comanda.RegistrarItem(itemSuco1);
-          //    comanda.RegistrarItem(itemSuco3);
-           //   comanda.RegistrarItem(itemConhaque);
-            //   comanda.RegistrarItem(itemSuco2);
-            //     comanda.RegistrarItem(itemSuco4);
+            IDefinidorDePromocoes executor = new ExecutorDePromocaoSimples();
 
-            
+            var itensQuantidade= new Dictionary<int, int> //Falta arrumar 
+            {
+                {1,5},
+                {4,2}
 
-            Console.WriteLine($"Total de itens: {comanda.Itens.Count}");
-            Console.ReadLine();
+            };
 
-            comanda.FechamentoComanda();
+            var tipoDeDesconto = TipoDeDesconto.Valor;
+            var idItemDesconto = 5;
+            var valorDesconto = 5;
+
+            var promocoes = new List<Promocao>(){
+                 new ComboItemDescontoPromocao(
+                     itensQuantidade,
+                     tipoDeDesconto,
+                     idItemDesconto,
+                     valorDesconto,
+                     id: 1,
+                     nome: "Combo")
+             };
 
 
-            comanda.ResetaComanda();
+            var c = new Comanda(restricoes, executor, promocoes);
+
+            var itemCerveja = new Item(id: 1, nome: "cerveja", valor:5, quantidade: 2);
+            var itemCerveja1 = new Item(id: 5, nome: "cerveja", valor: 5, quantidade: 3);
+            var itemSuco = new Item(id: 3, nome: "suco", valor:50, quantidade: 1);
+            var itemAgua = new Item(id:2,nome:"agua",valor:70, quantidade:1);
+            var itemConhaque = new Item(id:4,nome:"conhaque",valor:20, quantidade:3);
+
+            System.Console.WriteLine($"Incluindo novo item");
+            c.RegistrarItem(itemCerveja);
+            System.Console.WriteLine($"Incluindo novo item");
+            c.RegistrarItem(itemCerveja1);
+           
+
+            System.Console.WriteLine($"Incluindo novo item");
+            c.RegistrarItem(itemConhaque);
+
+            System.Console.WriteLine($"Incluindo novo item");
+            c.RegistrarItem(itemSuco);
+            System.Console.WriteLine($"Incluindo novo item");
+            c.RegistrarItem(itemSuco);
+            System.Console.WriteLine($"Incluindo novo item");
+            c.RegistrarItem(itemSuco);
 
 
-            Console.WriteLine($"\nTotal, depois de limpar: {comanda.Itens.Count}");
+            System.Console.WriteLine("Valor sem desconto: "+c.CalcularValorSemDescontos());
+            System.Console.WriteLine("\nFechamento da comanda: ");
+            c.FechamentoComanda();
+
+            System.Console.WriteLine($"Total de itens: {c.Itens.Count}");
+
+            System.Console.ReadKey();
+
+            c.ResetaComanda();
+
+            Console.WriteLine($"\nTotal, depois de limpar: {c.Itens.Count}");
+
+            /*A cada 5 cervejas compradas, o cliente pagará 4 cervejas.
+             -- Se o cliente comprar 3 conhaques mais 2 cervejas, poderá pedir uma água de graça.
+             -- Só é permitido 3 sucos por comanda.*/
+
         }
     }
 }
